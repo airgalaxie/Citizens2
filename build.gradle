@@ -3,10 +3,24 @@ plugins {
     alias(libs.plugins.shadow) apply false
 }
 
+def detectGitBuildNumber = {
+    try {
+        def process = ["git", "rev-parse", "--short", "HEAD"].execute(null, rootDir)
+        def commit = process.text.trim()
+        process.waitFor()
+        return process.exitValue() == 0 && commit ? "Gradle-g${commit}" : "Gradle-build"
+    } catch (Exception ignored) {
+        return "Gradle-build"
+    }
+}
+
 ext {
     citizensVersion = "2.0.43"
     javaRelease = 21
-    buildNumber = providers.gradleProperty("BUILD_NUMBER").orElse("Gradle-build").get()
+    buildNumber = providers.gradleProperty("BUILD_NUMBER")
+            .orElse(providers.environmentVariable("BUILD_NUMBER"))
+            .orElse(providers.provider(detectGitBuildNumber))
+            .get()
     gradleProfile = providers.gradleProperty("profile").orElse("dev").get()
 
     paperVersion = providers.gradleProperty("paperVersion").orElse(libs.versions.paper.get()).get()

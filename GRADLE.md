@@ -46,7 +46,22 @@ The output jar is written to:
 dist/target/Citizens-2.0.43-b<BUILD_NUMBER>.jar
 ```
 
-If no `BUILD_NUMBER` is passed, the file is named:
+Build number priority:
+
+```text
+1. -PBUILD_NUMBER=<value>
+2. BUILD_NUMBER environment variable
+3. Git short commit hash, formatted as Gradle-g<hash>
+4. Gradle-build fallback when Git is unavailable
+```
+
+With Git available and no explicit `BUILD_NUMBER`, the file is named like:
+
+```text
+dist/target/Citizens-2.0.43-bGradle-ged65ac7.jar
+```
+
+If Git is unavailable, the fallback file is named:
 
 ```text
 dist/target/Citizens-2.0.43-bGradle-build.jar
