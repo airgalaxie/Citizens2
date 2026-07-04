@@ -1,0 +1,166 @@
+plugins {
+    id "base"
+    alias(libs.plugins.shadow) apply false
+}
+
+ext {
+    citizensVersion = "2.0.43"
+    javaRelease = 21
+    buildNumber = providers.gradleProperty("BUILD_NUMBER").orElse("Gradle-build").get()
+    gradleProfile = providers.gradleProperty("profile").orElse("dev").get()
+
+    paperVersion = providers.gradleProperty("paperVersion").orElse(libs.versions.paper.get()).get()
+}
+
+allprojects {
+    group = "net.citizensnpcs"
+    version = "${rootProject.ext.citizensVersion}-SNAPSHOT"
+}
+
+ext.selectedModuleNames = {
+    switch (rootProject.ext.gradleProfile) {
+        case "dev":
+            return ["main", "v26_2_R1"]
+        case "spigot-release":
+            return ["main", "v1_21_R7", "v26_1_R1", "v26_2_R1"]
+        default:
+            throw new GradleException("Unsupported Gradle profile '${rootProject.ext.gradleProfile}'. Use -Pprofile=dev or -Pprofile=spigot-release.")
+    }
+}
+
+configure(subprojects.findAll { it.name != "dist" }) {
+    apply plugin: "java-library"
+    apply plugin: "maven-publish"
+    apply plugin: "com.gradleup.shadow"
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+        withSourcesJar()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = "UTF-8"
+        options.release.set(rootProject.ext.javaRelease as Integer)
+        def javacExecutable = rootProject.providers.gradleProperty("javacExecutable").orNull
+        if (javacExecutable != null) {
+            options.fork = true
+            options.forkOptions.executable = javacExecutable
+        }
+    }
+
+    tasks.named("jar") {
+        archiveClassifier.set("original")
+    }
+
+    tasks.named("shadowJar") {
+        archiveClassifier.set("")
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    tasks.named("assemble") {
+        dependsOn(tasks.named("shadowJar"))
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+    }
+}
+
+project(":main") {
+    base {
+        archivesName = "citizens-main"
+    }
+
+    dependencies {
+        compileOnly libs.spigot
+        compileOnly "io.papermc.paper:paper-api:${rootProject.ext.paperVersion}"
+        implementation libs.libby.bukkit
+        compileOnly libs.fastutil
+        compileOnly libs.packetevents.spigot
+        compileOnly libs.phtree
+        compileOnly libs.mocha
+        compileOnly libs.denizen
+        compileOnly libs.joml
+        api "net.citizensnpcs:citizensapi:${project.version}"
+        compileOnly libs.placeholderapi
+        compileOnly libs.vaultapi
+        compileOnly libs.worldguard.bukkit
+        compileOnly libs.adventure.text.minimessage
+        compileOnly libs.adventure.platform.bukkit
+        compileOnly libs.scoreboard.library.api
+        compileOnly libs.scoreboard.library.implementation
+        testImplementation libs.reflections
+    }
+
+    processResources {
+        filesMatching("plugin.yml") {
+            filter { line ->
+                line.replace('${project.version}', project.version.toString())
+                        .replace('${BUILD_NUMBER}', rootProject.ext.buildNumber.toString())
+            }
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        doFirst {
+            def ordered = classpath.files.toList()
+            def spigotFirst = ordered.findAll {
+                it.name.startsWith("spigot-") || it.name.startsWith("spigot-api-")
+            }
+            classpath = files(spigotFirst + (ordered - spigotFirst))
+        }
+    }
+
+    shadowJar {
+        minimize()
+        relocate "net.megavex.scoreboardlibrary", "clib.net.megavex.scoreboardlibrary"
+        relocate "net.kyori", "clib.net.kyori"
+        relocate "net.byteflux.libby", "clib.net.byteflux.libby"
+    }
+}
+
+def configureNmsModule(Project nmsProject, String artifactName, String spigotVersion, String classifier = null) {
+    nmsProject.base {
+        archivesName = artifactName
+    }
+
+    nmsProject.dependencies {
+        compileOnly nmsProject.project(":main")
+        if (classifier == null) {
+            compileOnly "org.spigotmc:spigot:${spigotVersion}"
+        } else {
+            compileOnly "org.spigotmc:spigot:${spigotVersion}:${classifier}"
+        }
+    }
+}
+
+configureNmsModule(project(":v1_21_R7"), "citizens-v1_21_R7", libs.versions.craftbukkitV121R7.get(), "remapped-mojang")
+configureNmsModule(project(":v26_1_R1"), "citizens-v26_1_R1", libs.versions.craftbukkitV261R1.get())
+configureNmsModule(project(":v26_2_R1"), "citizens-v26_2_R1", libs.versions.craftbukkit.get())
+
+configure(subprojects.findAll { it.name != "dist" && !rootProject.ext.selectedModuleNames().contains(it.name) }) {
+    tasks.configureEach {
+        enabled = false
+    }
+}
+
+tasks.named("build") {
+    dependsOn(":dist:pluginJar")
+}
+
+tasks.register("devPlugin") {
+    group = "build"
+    description = "Builds a reduced Citizens plugin jar using main and v26_2_R1."
+    dependsOn(":dist:pluginJar")
+}
+
+tasks.register("spigotReleasePlugin") {
+    group = "build"
+    description = "Builds the spigot-release Citizens plugin jar."
+    dependsOn(":dist:pluginJar")
+}

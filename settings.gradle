@@ -1,0 +1,57 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenLocal()
+        maven {
+            name = "citizens-repo"
+            url = uri("https://maven.citizensnpcs.co/repo")
+        }
+        maven {
+            name = "spigot-repo"
+            url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+        }
+        maven {
+            name = "papermc"
+            url = uri("https://repo.papermc.io/repository/maven-public/")
+        }
+        maven {
+            name = "codemc-releases"
+            url = uri("https://repo.codemc.io/repository/maven-releases/")
+        }
+        maven {
+            name = "jitpack"
+            url = uri("https://jitpack.io")
+            mavenContent {
+                releasesOnly()
+            }
+        }
+        maven {
+            name = "placeholderapi"
+            url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+        }
+        maven {
+            name = "sk89q-repo"
+            url = uri("https://maven.enginehub.org/repo/")
+        }
+        maven {
+            name = "AlessioDP"
+            url = uri("https://repo.alessiodp.com/releases/")
+        }
+        mavenCentral()
+    }
+}
+
+rootProject.name = "citizens-parent"
+
+include("main")
+include("v1_21_R7")
+include("v26_1_R1")
+include("v26_2_R1")
+include("dist")

@@ -1,0 +1,33 @@
+plugins {
+    id "base"
+}
+
+def selectedModulePaths = {
+    rootProject.ext.selectedModuleNames().collect { ":${it}" }
+}
+
+tasks.register("pluginJar", Jar) {
+    group = "build"
+    description = "Builds the runnable Citizens plugin jar from the selected module jars."
+
+    archiveFileName.set("Citizens-${rootProject.ext.citizensVersion}-b${rootProject.ext.buildNumber}.jar")
+    destinationDirectory.set(layout.projectDirectory.dir("target"))
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes("paperweight-mappings-namespace": "spigot")
+    }
+
+    def moduleProjects = selectedModulePaths().collect { project(it) }
+    dependsOn(moduleProjects.collect { it.tasks.named("shadowJar") })
+
+    from {
+        moduleProjects.collect {
+            zipTree(it.tasks.named("shadowJar").get().archiveFile.get().asFile)
+        }
+    }
+}
+
+tasks.named("assemble") {
+    dependsOn(tasks.named("pluginJar"))
+}
