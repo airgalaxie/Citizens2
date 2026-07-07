@@ -28,7 +28,7 @@ So this command also uses the dev module set by default:
 ./gradlew clean build --refresh-dependencies --info
 ```
 
-The Gradle build targets Java 21 bytecode and can be run with Java 26:
+The Gradle build targets Java 25 bytecode and can be run with Java 26:
 
 ```bash
 JAVA_HOME=/usr/lib64/jvm/java-26-openjdk-26 ./gradlew clean build --refresh-dependencies --info
