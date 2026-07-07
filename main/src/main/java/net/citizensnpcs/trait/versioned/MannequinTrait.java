@@ -48,7 +48,7 @@ public class MannequinTrait extends Trait {
                         description == null ? null : Messaging.minecraftComponentFromRawMessage(description));
             }
             mannequin.setImmovable(immovable);
-            mannequin.setHideDescription(hideDescription);
+            NMS.setMannequinHideDescription(mannequin, hideDescription);
         }
     }
 
