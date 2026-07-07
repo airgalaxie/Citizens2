@@ -73,7 +73,7 @@ Known differences from Maven:
 The branch includes a Gradle 9.6.1 wrapper and uses the com.gradleup.shadow
 plugin.
 
-The dev profile targets Java 21 bytecode and has been tested with Java 26:
+The dev profile targets Java 25 bytecode and has been tested with Java 26:
 JAVA_HOME=/usr/lib64/jvm/java-26-openjdk-26 ./gradlew clean build
 
 The spigot-release profile still requires all Spigot artifacts to exist locally
