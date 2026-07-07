@@ -1682,6 +1682,16 @@ public class NMSImpl implements NMSBridge {
     }
 
     @Override
+    public void setMannequinHideDescription(org.bukkit.entity.Entity mannequin, boolean hide) {
+        ((Mannequin) getHandle(mannequin)).setHideDescription(hide);
+    }
+
+    @Override
+    public void setCopperGolemWeatheringTick(org.bukkit.entity.Entity copperGolem, long tick) {
+        ((net.minecraft.world.entity.animal.golem.CopperGolem) getHandle(copperGolem)).nextWeatheringTick = tick;
+    }
+
+    @Override
     public void setNavigationTarget(org.bukkit.entity.Entity handle, org.bukkit.entity.Entity target, float speed) {
         getNavigation(handle).moveTo(getHandle(target), speed);
     }

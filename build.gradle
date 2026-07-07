@@ -16,7 +16,7 @@ def detectGitBuildNumber = {
 
 ext {
     citizensVersion = "2.0.43"
-    javaRelease = 21
+    javaRelease = 25
     buildNumber = providers.gradleProperty("BUILD_NUMBER")
             .orElse(providers.environmentVariable("BUILD_NUMBER"))
             .orElse(providers.provider(detectGitBuildNumber))
@@ -48,8 +48,8 @@ configure(subprojects.findAll { it.name != "dist" }) {
     apply plugin: "com.gradleup.shadow"
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.toVersion(rootProject.ext.javaRelease)
+        targetCompatibility = JavaVersion.toVersion(rootProject.ext.javaRelease)
         withSourcesJar()
     }
 
@@ -91,7 +91,9 @@ project(":main") {
     }
 
     dependencies {
-        compileOnly libs.spigot
+        compileOnly(libs.spigot) {
+            exclude group: "org.spigotmc", module: "spigot-api"
+        }
         compileOnly "io.papermc.paper:paper-api:${rootProject.ext.paperVersion}"
         implementation libs.libby.bukkit
         compileOnly libs.fastutil
@@ -100,9 +102,12 @@ project(":main") {
         compileOnly libs.mocha
         compileOnly libs.denizen
         compileOnly libs.joml
+        implementation libs.json.simple
         api "net.citizensnpcs:citizensapi:${project.version}"
         compileOnly libs.placeholderapi
-        compileOnly libs.vaultapi
+        compileOnly(libs.vaultapi) {
+            exclude group: "org.bukkit", module: "bukkit"
+        }
         compileOnly libs.worldguard.bukkit
         compileOnly libs.adventure.text.minimessage
         compileOnly libs.adventure.platform.bukkit
@@ -131,7 +136,9 @@ project(":main") {
     }
 
     shadowJar {
-        minimize()
+        minimize {
+            exclude(dependency("net.citizensnpcs:citizensapi:.*"))
+        }
         relocate "net.megavex.scoreboardlibrary", "clib.net.megavex.scoreboardlibrary"
         relocate "net.kyori", "clib.net.kyori"
         relocate "net.byteflux.libby", "clib.net.byteflux.libby"

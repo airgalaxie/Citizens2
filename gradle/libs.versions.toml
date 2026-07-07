@@ -11,6 +11,7 @@ phtree = "2.8.2"
 mocha = "3.0.0"
 denizen = "1.3.2-SNAPSHOT"
 joml = "1.10.9"
+json-simple = "1.1.1"
 placeholderapi = "2.11.5"
 vaultapi = "1.7"
 worldguard = "7.0.16"
@@ -34,6 +35,7 @@ phtree = { module = "ch.ethz.globis.phtree:phtree", version.ref = "phtree" }
 mocha = { module = "team.unnamed:mocha", version.ref = "mocha" }
 denizen = { module = "com.denizenscript:denizen", version.ref = "denizen" }
 joml = { module = "org.joml:joml", version.ref = "joml" }
+json-simple = { module = "com.googlecode.json-simple:json-simple", version.ref = "json-simple" }
 placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
 vaultapi = { module = "com.github.MilkBowl:VaultAPI", version.ref = "vaultapi" }
 worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version.ref = "worldguard" }
