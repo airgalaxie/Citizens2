@@ -1,5 +1,5 @@
 [versions]
-shadow = "9.4.3"
+shadow = "9.5.1"
 craftbukkit = "26.2-R0.1-SNAPSHOT"
 craftbukkitV121R7 = "1.21.11-R0.2-SNAPSHOT"
 craftbukkitV261R1 = "26.1.2-R0.1-SNAPSHOT"
