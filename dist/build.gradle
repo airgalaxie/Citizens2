@@ -14,7 +14,7 @@ tasks.register("pluginJar", Jar) {
     group = "build"
     description = "Builds the runnable Citizens plugin jar from the selected module jars."
 
-    archiveFileName.set("Citizens-${rootProject.ext.citizensVersion}-b${rootProject.ext.buildNumber}.jar")
+    archiveFileName.set("Citizens-${rootProject.ext.citizensVersion}-b${rootProject.ext.buildNumber}-Gradle-build.jar")
     destinationDirectory.set(layout.projectDirectory.dir("target"))
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude("META-INF/maven/**")
