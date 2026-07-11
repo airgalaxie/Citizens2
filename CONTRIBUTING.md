@@ -6,16 +6,21 @@ Sign the CLA [here](https://cla-assistant.io/CitizensDev/Citizens2)
 Development environment setup
 =============================
 1. Clone Citizens2 and CitizensAPI repos to your machine
-2. Import the maven project to your IDE of choice. Citizens targets Java 8 - Java 9+ code should not be used.
+2. Import the Gradle project into your IDE of choice. This branch targets Java 25 bytecode and is intended to build with Java 26.
 
-Citizens is structured using an overarching maven project with several submodules for different parts of the codebase
-`api` - the API, with a loosely defined boundary but mainly containing interfaces and events that are agnostic to the lifecycle of a Spigot plugin
+Citizens is structured as a Gradle multi-project build:
 `main` - the main Citizens codebase which implements commands and Spigot plugin-specific code
-`dist` - the distribution subproject which will actually build your Citizens JAR with relevant submodules
+`v1_21_R7`, `v26_1_R1`, `v26_2_R1` - version-specific NMS modules
+`dist` - the distribution subproject which builds the runnable Citizens JAR from the selected modules
 
-3. Next, run Spigot's BuildTools.jar for all supported Minecraft versions to install the Spigot JARs to your local maven repo (see `dist/pom.xml` for the current list)
-We recommend using the `dev` maven build profile which will only build for the latest Minecraft version. This saves you having to install 10 different old versions.
-Try to build your first Citizens2 JAR using `mvn install dist/pom.xml -P dev`
+3. Build your first Citizens2 JAR with Gradle:
+
+```bash
+./gradlew clean build
+```
+
+The default `dev` profile builds `main` and `v26_2_R1`. Use
+`-Pprofile=spigot-release` when you need the full release module set.
 
 Now you're ready to start creating a pull request!
 

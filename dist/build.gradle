@@ -2,6 +2,10 @@ plugins {
     id "base"
 }
 
+tasks.named("clean") {
+    delete(layout.projectDirectory.dir("target"))
+}
+
 def selectedModulePaths = {
     rootProject.ext.selectedModuleNames().collect { ":${it}" }
 }
@@ -13,6 +17,7 @@ tasks.register("pluginJar", Jar) {
     archiveFileName.set("Citizens-${rootProject.ext.citizensVersion}-b${rootProject.ext.buildNumber}.jar")
     destinationDirectory.set(layout.projectDirectory.dir("target"))
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude("META-INF/maven/**")
 
     manifest {
         attributes("paperweight-mappings-namespace": "spigot")

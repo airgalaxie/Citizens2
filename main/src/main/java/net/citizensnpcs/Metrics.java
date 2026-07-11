@@ -598,7 +598,7 @@ public class Metrics {
             // You can use the property to disable the check in your test environment
             if (System.getProperty("bstats.relocatecheck") == null
                     || !System.getProperty("bstats.relocatecheck").equals("false")) {
-                // Maven's Relocate is clever and changes strings, too. So we have to use this little
+                // Relocation tools may change strings, too. So we have to use this little
                 // "trick" ... :D
                 String defaultPackage = new String(new byte[] { 'o', 'r', 'g', '.', 'b', 's', 't', 'a', 't', 's' });
                 String examplePackage = new String(

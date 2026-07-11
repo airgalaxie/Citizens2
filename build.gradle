@@ -44,7 +44,6 @@ ext.selectedModuleNames = {
 
 configure(subprojects.findAll { it.name != "dist" }) {
     apply plugin: "java-library"
-    apply plugin: "maven-publish"
     apply plugin: "com.gradleup.shadow"
 
     java {
@@ -70,19 +69,13 @@ configure(subprojects.findAll { it.name != "dist" }) {
     tasks.named("shadowJar") {
         archiveClassifier.set("")
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        exclude("META-INF/maven/**")
     }
 
     tasks.named("assemble") {
         dependsOn(tasks.named("shadowJar"))
     }
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-            }
-        }
-    }
 }
 
 project(":main") {
