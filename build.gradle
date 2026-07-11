@@ -91,6 +91,29 @@ project(":main") {
     }
 
     dependencies {
+        components {
+            // WorldGuard 7.0.18-SNAPSHOT publishes strict Guava/Gson constraints that lag behind
+            // Paper's API requirements. Remove only those producer metadata constraints from the
+            // affected EngineHub modules and let Gradle select versions normally. This can be
+            // removed once EngineHub stops publishing obsolete strict constraints for these modules.
+            [
+                    "com.sk89q.worldguard:worldguard-bukkit",
+                    "com.sk89q.worldguard:worldguard-core",
+                    "com.sk89q.worldedit:worldedit-core"
+            ].each { engineHubModule ->
+                withModule(engineHubModule) {
+                    allVariants {
+                        withDependencyConstraints {
+                            removeAll { constraint ->
+                                (constraint.group == "com.google.guava" && constraint.name == "guava")
+                                        || (constraint.group == "com.google.code.gson" && constraint.name == "gson")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         compileOnly(libs.spigot) {
             exclude group: "org.spigotmc", module: "spigot-api"
         }
