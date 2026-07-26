@@ -923,10 +923,6 @@ public class NMS {
         BRIDGE.setCamelPose(entity, pose);
     }
 
-    public static void setCopperGolemWeatheringTick(Entity copperGolem, long tick) {
-        BRIDGE.setCopperGolemWeatheringTick(copperGolem, tick);
-    }
-
     public static void setCustomName(Entity entity, Object component, String string) {
         BRIDGE.setCustomName(entity, component, string);
     }
@@ -965,10 +961,6 @@ public class NMS {
 
     public static void setMannequinDescription(Entity mannequin, Object component) {
         BRIDGE.setMannequinDescription(mannequin, component);
-    }
-
-    public static void setMannequinHideDescription(Entity mannequin, boolean hide) {
-        BRIDGE.setMannequinHideDescription(mannequin, hide);
     }
 
     public static void setNavigationTarget(Entity handle, Entity target, float speed) {

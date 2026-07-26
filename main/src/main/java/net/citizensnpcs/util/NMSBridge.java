@@ -235,9 +235,6 @@ public interface NMSBridge {
 
     public void setHeadYaw(Entity entity, float yaw);
 
-    public default void setCopperGolemWeatheringTick(Entity copperGolem, long tick) {
-    }
-
     public default void setKnockbackResistance(LivingEntity entity, double d) {
         AttributeInstance ai = entity.getAttribute(Attribute.KNOCKBACK_RESISTANCE);
         if (ai != null) {
@@ -252,9 +249,6 @@ public interface NMSBridge {
     }
 
     public default void setMannequinDescription(Entity mannequin, Object component) {
-    }
-
-    public default void setMannequinHideDescription(Entity mannequin, boolean hide) {
     }
 
     public void setNavigationTarget(Entity handle, Entity target, float speed);

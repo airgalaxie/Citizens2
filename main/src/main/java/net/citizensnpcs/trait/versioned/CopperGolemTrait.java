@@ -86,7 +86,7 @@ public class CopperGolemTrait extends Trait {
             output += Messaging.tr(Messages.COPPER_WEATHER_STATE_SET, state);
         }
         if (tick != null) {
-            NMS.setCopperGolemWeatheringTick(npc.getEntity(), tick);
+            ((CopperGolem) npc.getEntity()).setNextWeatheringTick(tick);
             output += Messaging.tr(Messages.COPPER_WEATHER_TICK_SET, tick);
         }
         if (!output.isEmpty()) {
