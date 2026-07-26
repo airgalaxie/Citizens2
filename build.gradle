@@ -107,9 +107,7 @@ project(":main") {
             }
         }
 
-        compileOnly(libs.spigot) {
-            exclude group: "org.spigotmc", module: "spigot-api"
-        }
+        compileOnly libs.spigot
         compileOnly "io.papermc.paper:paper-api:${rootProject.ext.paperVersion}"
         implementation libs.libby.bukkit
         compileOnly libs.fastutil
