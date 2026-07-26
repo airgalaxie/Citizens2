@@ -95,6 +95,13 @@ The branch includes a Gradle 9.6.1 wrapper and uses the com.gradleup.shadow
 
 Paper API 26.2 is selected by default through the version catalog.
 
+The upstream Maven build intentionally puts both the full Spigot server and
+Paper API on the `main` provided compile classpath. Paper's Gradle metadata
+also advertises `paper-api` as a provider of the `org.spigotmc:spigot-api`
+capability, so Gradle would normally reject that combination. The Gradle build
+removes only this replacement capability from Paper's component metadata to
+preserve the upstream compile classpath; both dependencies remain compile-only.
+
 The spigot-release profile requires all Spigot artifacts to exist locally or
 remotely. In this workspace, `org.spigotmc:spigot:1.21.11-R0.2-SNAPSHOT` is not
 available, so the default `dev` profile is the verified self-contained build.

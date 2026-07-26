@@ -85,6 +85,19 @@ project(":main") {
 
     dependencies {
         components {
+            // Citizens intentionally compiles against both the full Spigot server and Paper API,
+            // matching the upstream Maven build. Paper advertises itself as a spigot-api
+            // replacement in Gradle metadata, which would otherwise make that classpath
+            // unresolvable. Keep both compile-only artifacts by removing only the replacement
+            // capability; the modules and their dependencies remain unchanged.
+            withModule("io.papermc.paper:paper-api") {
+                allVariants {
+                    withCapabilities {
+                        removeCapability("org.spigotmc", "spigot-api")
+                    }
+                }
+            }
+
             // WorldGuard 7.0.18-SNAPSHOT publishes strict Guava/Gson constraints that lag behind
             // Paper's API requirements. Remove only those producer metadata constraints from the
             // affected EngineHub modules and let Gradle select versions normally. This can be
