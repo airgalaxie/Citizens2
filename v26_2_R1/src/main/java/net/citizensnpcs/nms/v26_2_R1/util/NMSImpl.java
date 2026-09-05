@@ -1424,7 +1424,7 @@ public class NMSImpl implements NMSBridge {
             return;
         NPC npc = CitizensAPI.getNPCRegistry().getNPC(hooked.getBukkitEntity());
         if (npc != null && npc.isProtected()) {
-            hook.hookedIn = null;
+            hook.setHookedEntity(null);
             hook.getBukkitEntity().remove();
         }
     }
@@ -2473,7 +2473,7 @@ public class NMSImpl implements NMSBridge {
     }
 
     public static boolean moveFish(NPC npc, Mob handle, Vec3 vec3d) {
-        if (npc == null || npc.useMinecraftAI())
+        if (npc.useMinecraftAI())
             return false;
         if (handle.isInWater() && !npc.getNavigator().isNavigating()) {
             handle.moveRelative(handle instanceof Dolphin || handle instanceof Axolotl ? handle.getSpeed()
