@@ -254,6 +254,7 @@ import net.citizensnpcs.trait.versioned.EnderDragonTrait;
 import net.citizensnpcs.trait.versioned.FoxTrait;
 import net.citizensnpcs.trait.versioned.FrogTrait;
 import net.citizensnpcs.trait.versioned.GoatTrait;
+import net.citizensnpcs.trait.versioned.InteractionTrait;
 import net.citizensnpcs.trait.versioned.ItemDisplayTrait;
 import net.citizensnpcs.trait.versioned.LlamaTrait;
 import net.citizensnpcs.trait.versioned.MannequinTrait;
@@ -1065,6 +1066,7 @@ public class NMSImpl implements NMSBridge {
         registerTraitWithCommand(manager, SpellcasterTrait.class);
         registerTraitWithCommand(manager, ShulkerTrait.class);
         registerTraitWithCommand(manager, VexTrait.class);
+        registerTraitWithCommand(manager, InteractionTrait.class);
         registerTraitWithCommand(manager, SnowmanTrait.class);
         registerTraitWithCommand(manager, TextDisplayTrait.class);
         registerTraitWithCommand(manager, TropicalFishTrait.class);
@@ -2474,7 +2476,7 @@ public class NMSImpl implements NMSBridge {
     }
 
     public static boolean moveFish(NPC npc, Mob handle, Vec3 vec3d) {
-        if (npc == null || npc.useMinecraftAI())
+        if (npc.useMinecraftAI())
             return false;
         if (handle.isInWater() && !npc.getNavigator().isNavigating()) {
             handle.moveRelative(handle instanceof Dolphin || handle instanceof Axolotl ? handle.getSpeed()
@@ -2954,7 +2956,7 @@ public class NMSImpl implements NMSBridge {
     private static final MethodHandle CHUNKMAP_UPDATE_PLAYER_STATUS = NMS.getMethodHandle(ChunkMap.class,
             "updatePlayerStatus", true, ServerPlayer.class, boolean.class);
     private static final MethodHandle CLIENT_LOADED_TIMEOUT_TIMER = NMS.getSetter(ServerGamePacketListenerImpl.class,
-            "clientLoadedTimeoutTimer");
+            "clientLoadedTimeoutTimer", false);
     public static final MethodHandle CONNECTION_DISCONNECT_LISTENER = NMS.getSetter(Connection.class,
             "disconnectListener");
     public static final MethodHandle CONNECTION_PACKET_LISTENER = NMS.getSetter(Connection.class, "packetListener");

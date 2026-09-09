@@ -255,6 +255,7 @@ import net.citizensnpcs.trait.versioned.EnderDragonTrait;
 import net.citizensnpcs.trait.versioned.FoxTrait;
 import net.citizensnpcs.trait.versioned.FrogTrait;
 import net.citizensnpcs.trait.versioned.GoatTrait;
+import net.citizensnpcs.trait.versioned.InteractionTrait;
 import net.citizensnpcs.trait.versioned.ItemDisplayTrait;
 import net.citizensnpcs.trait.versioned.LlamaTrait;
 import net.citizensnpcs.trait.versioned.MannequinTrait;
@@ -1068,6 +1069,7 @@ public class NMSImpl implements NMSBridge {
         registerTraitWithCommand(manager, SulfurCubeTrait.class);
         registerTraitWithCommand(manager, VexTrait.class);
         registerTraitWithCommand(manager, SnowmanTrait.class);
+        registerTraitWithCommand(manager, InteractionTrait.class);
         registerTraitWithCommand(manager, TextDisplayTrait.class);
         registerTraitWithCommand(manager, TropicalFishTrait.class);
         registerTraitWithCommand(manager, VillagerTrait.class);
@@ -1424,7 +1426,7 @@ public class NMSImpl implements NMSBridge {
             return;
         NPC npc = CitizensAPI.getNPCRegistry().getNPC(hooked.getBukkitEntity());
         if (npc != null && npc.isProtected()) {
-            hook.hookedIn = null;
+            hook.setHookedEntity(null);
             hook.getBukkitEntity().remove();
         }
     }
@@ -2483,7 +2485,7 @@ public class NMSImpl implements NMSBridge {
     }
 
     public static boolean moveFish(NPC npc, Mob handle, Vec3 vec3d) {
-        if (npc == null || npc.useMinecraftAI())
+        if (npc.useMinecraftAI())
             return false;
         if (handle.isInWater() && !npc.getNavigator().isNavigating()) {
             handle.moveRelative(handle instanceof Dolphin || handle instanceof Axolotl ? handle.getSpeed()

@@ -254,6 +254,7 @@ import net.citizensnpcs.trait.versioned.EnderDragonTrait;
 import net.citizensnpcs.trait.versioned.FoxTrait;
 import net.citizensnpcs.trait.versioned.FrogTrait;
 import net.citizensnpcs.trait.versioned.GoatTrait;
+import net.citizensnpcs.trait.versioned.InteractionTrait;
 import net.citizensnpcs.trait.versioned.ItemDisplayTrait;
 import net.citizensnpcs.trait.versioned.LlamaTrait;
 import net.citizensnpcs.trait.versioned.MannequinTrait;
@@ -1063,6 +1064,7 @@ public class NMSImpl implements NMSBridge {
         registerTraitWithCommand(manager, ShulkerTrait.class);
         registerTraitWithCommand(manager, VexTrait.class);
         registerTraitWithCommand(manager, SnowmanTrait.class);
+        registerTraitWithCommand(manager, InteractionTrait.class);
         registerTraitWithCommand(manager, TextDisplayTrait.class);
         registerTraitWithCommand(manager, TropicalFishTrait.class);
         registerTraitWithCommand(manager, VillagerTrait.class);
@@ -2427,7 +2429,13 @@ public class NMSImpl implements NMSBridge {
     public static void markClientLoaded(ServerGamePacketListenerImpl connection) {
         try {
             WAITING_FOR_RESPAWN.invoke(connection, false);
-            CLIENT_LOADED_TIMEOUT_TIMER.invoke(connection, 0);
+            if (CLIENT_LOADED_TIMEOUT_TIMER != null) {
+                CLIENT_LOADED_TIMEOUT_TIMER.invoke(connection, 0);
+            } else {
+                for (int i = 0; i <= 60; i++) {
+                    connection.tickClientLoadTimeout();
+                }
+            }
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -2449,7 +2457,7 @@ public class NMSImpl implements NMSBridge {
     }
 
     public static boolean moveFish(NPC npc, Mob handle, Vec3 vec3d) {
-        if (npc == null || npc.useMinecraftAI())
+        if (npc.useMinecraftAI())
             return false;
         if (handle.isInWater() && !npc.getNavigator().isNavigating()) {
             handle.moveRelative(handle instanceof Dolphin || handle instanceof Axolotl ? handle.getSpeed()
@@ -2825,7 +2833,7 @@ public class NMSImpl implements NMSBridge {
     private static final MethodHandle CHUNKMAP_UPDATE_PLAYER_STATUS = NMS.getMethodHandle(ChunkMap.class, "a", true,
             ServerPlayer.class, boolean.class);
     private static final MethodHandle CLIENT_LOADED_TIMEOUT_TIMER = NMS.getSetter(ServerGamePacketListenerImpl.class,
-            "clientLoadedTimeoutTimer");
+            "clientLoadedTimeoutTimer", false);
     public static final MethodHandle CONNECTION_DISCONNECT_LISTENER = NMS.getSetter(Connection.class, "m");
     public static final MethodHandle CONNECTION_PACKET_LISTENER = NMS.getSetter(Connection.class, "n");
     private static final MethodHandle CRAFT_BOSSBAR_HANDLE_FIELD = NMS.getFirstSetter(CraftBossBar.class,
