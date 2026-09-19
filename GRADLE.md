@@ -38,7 +38,7 @@ If no profile is passed, Gradle uses the `dev` profile. That builds only:
 
 ```text
 main
-v26_2_R1
+v26_3_R1
 ```
 
 So this command also uses the dev module set by default:
@@ -63,7 +63,7 @@ If Gradle is run with a JRE instead of a JDK, pass a compiler explicitly:
 The runnable plugin JAR is written to:
 
 ```text
-dist/target/Citizens-2.0.43-b<BUILD_NUMBER>.jar
+dist/target/Citizens-2.0.44-b<BUILD_NUMBER>-Gradle-build.jar
 ```
 
 Build number priority:
@@ -78,22 +78,22 @@ Build number priority:
 With Git available and no explicit `BUILD_NUMBER`, the file is named like:
 
 ```text
-dist/target/Citizens-2.0.43-bGradle-ged65ac7.jar
+dist/target/Citizens-2.0.44-bGradle-ged65ac7-Gradle-build.jar
 ```
 
 If Git is unavailable, the fallback file is named:
 
 ```text
-dist/target/Citizens-2.0.43-bGradle-build.jar
+dist/target/Citizens-2.0.44-bGradle-build-Gradle-build.jar
 ```
 
 Build details:
 
 ```text
-The branch includes a Gradle 9.6.1 wrapper and uses the com.gradleup.shadow
-9.5.1 plugin.
+The branch includes a Gradle 9.7.1 wrapper and uses the com.gradleup.shadow
+9.6.1 plugin.
 
-Paper API 26.2 is selected by default through the version catalog.
+Paper API 26.3 is selected by default through the version catalog.
 
 The upstream Maven build intentionally puts both the full Spigot server and
 Paper API on the `main` provided compile classpath. Paper's Gradle metadata
@@ -102,9 +102,9 @@ capability, so Gradle would normally reject that combination. The Gradle build
 removes only this replacement capability from Paper's component metadata to
 preserve the upstream compile classpath; both dependencies remain compile-only.
 
-The spigot-release profile requires all Spigot artifacts to exist locally or
-remotely. In this workspace, `org.spigotmc:spigot:1.21.11-R0.2-SNAPSHOT` is not
-available, so the default `dev` profile is the verified self-contained build.
+The spigot-release profile requires all configured Spigot artifacts to exist
+locally or remotely. The default `dev` profile only resolves the current 26.3
+module and is the normal development build.
 
 The Paper API version can be overridden with -PpaperVersion=<version>.
 ```

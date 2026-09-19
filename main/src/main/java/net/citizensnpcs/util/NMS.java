@@ -947,6 +947,10 @@ public class NMS {
         BRIDGE.setHeadYaw(entity, yaw);
     }
 
+    public static void setCopperGolemWeatheringTick(Entity copperGolem, long tick) {
+        BRIDGE.setCopperGolemWeatheringTick(copperGolem, tick);
+    }
+
     public static void setKnockbackResistance(org.bukkit.entity.LivingEntity entity, double d) {
         BRIDGE.setKnockbackResistance(entity, d);
     }
@@ -961,6 +965,10 @@ public class NMS {
 
     public static void setMannequinDescription(Entity mannequin, Object component) {
         BRIDGE.setMannequinDescription(mannequin, component);
+    }
+
+    public static void setMannequinHideDescription(Entity mannequin, boolean hide) {
+        BRIDGE.setMannequinHideDescription(mannequin, hide);
     }
 
     public static void setNavigationTarget(Entity handle, Entity target, float speed) {

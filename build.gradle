@@ -15,7 +15,7 @@ def detectGitBuildNumber = {
 }
 
 ext {
-    citizensVersion = "2.0.43"
+    citizensVersion = "2.0.44"
     javaRelease = 25
     buildNumber = providers.gradleProperty("BUILD_NUMBER")
             .orElse(providers.environmentVariable("BUILD_NUMBER"))
@@ -34,9 +34,9 @@ allprojects {
 ext.selectedModuleNames = {
     switch (rootProject.ext.gradleProfile) {
         case "dev":
-            return ["main", "v26_2_R1"]
+            return ["main", "v26_3_R1"]
         case "spigot-release":
-            return ["main", "v1_21_R7", "v26_1_R1", "v26_2_R1"]
+            return ["main", "v26_1_R1", "v26_2_R1", "v26_3_R1"]
         default:
             throw new GradleException("Unsupported Gradle profile '${rootProject.ext.gradleProfile}'. Use -Pprofile=dev or -Pprofile=spigot-release.")
     }
@@ -98,7 +98,7 @@ project(":main") {
                 }
             }
 
-            // WorldGuard 7.0.18-SNAPSHOT publishes strict Guava/Gson constraints that lag behind
+            // WorldGuard publishes strict Guava/Gson constraints that lag behind
             // Paper's API requirements. Remove only those producer metadata constraints from the
             // affected EngineHub modules and let Gradle select versions normally. This can be
             // removed once EngineHub stops publishing obsolete strict constraints for these modules.
@@ -187,9 +187,9 @@ def configureNmsModule(Project nmsProject, String artifactName, String spigotVer
     }
 }
 
-configureNmsModule(project(":v1_21_R7"), "citizens-v1_21_R7", libs.versions.craftbukkitV121R7.get(), "remapped-mojang")
 configureNmsModule(project(":v26_1_R1"), "citizens-v26_1_R1", libs.versions.craftbukkitV261R1.get())
-configureNmsModule(project(":v26_2_R1"), "citizens-v26_2_R1", libs.versions.craftbukkit.get())
+configureNmsModule(project(":v26_2_R1"), "citizens-v26_2_R1", libs.versions.craftbukkitV262R1.get())
+configureNmsModule(project(":v26_3_R1"), "citizens-v26_3_R1", libs.versions.craftbukkit.get())
 
 configure(subprojects.findAll { it.name != "dist" && !rootProject.ext.selectedModuleNames().contains(it.name) }) {
     tasks.configureEach {
@@ -203,7 +203,7 @@ tasks.named("build") {
 
 tasks.register("devPlugin") {
     group = "build"
-    description = "Builds a reduced Citizens plugin jar using main and v26_2_R1."
+    description = "Builds a reduced Citizens plugin jar using main and v26_3_R1."
     dependsOn(":dist:pluginJar")
 }
 

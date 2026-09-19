@@ -51,7 +51,7 @@ dependencyResolutionManagement {
 rootProject.name = "citizens-parent"
 
 include("main")
-include("v1_21_R7")
 include("v26_1_R1")
 include("v26_2_R1")
+include("v26_3_R1")
 include("dist")

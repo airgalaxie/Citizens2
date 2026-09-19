@@ -20,7 +20,7 @@ Use the Gradle wrapper:
 
 The build targets Java 25 bytecode and is intended to run with a Java 26 build
 environment. The default development build uses the `dev` profile and builds the
-`main` and `v26_2_R1` modules. The optional release module set is available with:
+`main` and `v26_3_R1` modules. The optional release module set is available with:
 
 ```bash
 ./gradlew -Pprofile=spigot-release clean build
@@ -33,7 +33,7 @@ profile is the self-contained build used for normal development.
 The runnable plugin JAR is written to:
 
 ```text
-dist/target/Citizens-2.0.43-b<BUILD_NUMBER>.jar
+dist/target/Citizens-2.0.44-b<BUILD_NUMBER>-Gradle-build.jar
 ```
 
 See `GRADLE.md` for build profiles, Java configuration, and output naming.
