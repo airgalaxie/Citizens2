@@ -1755,6 +1755,11 @@ public class NMSImpl implements NMSBridge {
     }
 
     @Override
+    public void setNoPhysics(org.bukkit.entity.Entity entity, boolean nophysics) {
+        getHandle(entity).noPhysics = nophysics;
+    }
+
+    @Override
     public void setOpWithoutSaving(Player player, boolean op) {
         if (player.isOp() == op)
             return;
@@ -2496,7 +2501,7 @@ public class NMSImpl implements NMSBridge {
             minecart.setCustomDisplayBlockState(Optional.empty());
         }
         minecart.setDisplayOffset(offset);
-    }
+    };
 
     public static boolean moveFish(NPC npc, Mob handle, Vec3 vec3d) {
         if (npc.useMinecraftAI())
@@ -2509,7 +2514,7 @@ public class NMSImpl implements NMSBridge {
             return true;
         }
         return false;
-    };
+    }
 
     public static void moveLogic(LivingEntity entity, Vec3 v) {
         if (entity.isEffectiveAi() || entity.canSimulateMovement()) {
@@ -2748,6 +2753,19 @@ public class NMSImpl implements NMSBridge {
             return;
         }
         map.putAll(npc.data().get("efi"));
+    }
+
+    public static void removeRegionConnection(ServerPlayer player) {
+        if (FOLIA_REMOVE_CONNECTION == null)
+            return;
+        try {
+            Object worldData = FOLIA_GET_CURRENT_WORLD_DATA.invoke(player.level());
+            if (worldData != null) {
+                FOLIA_REMOVE_CONNECTION.invoke(worldData, player);
+            }
+        } catch (Throwable e) {
+            // the NPC's region isn't the one currently being ticked, so it holds no connection to remove
+        }
     }
 
     public static void restoreGoals(NPC npc, Mob entity) {
@@ -2998,6 +3016,11 @@ public class NMSImpl implements NMSBridge {
     public static final MethodHandle CONNECTION_DISCONNECT_LISTENER = NMS.getSetter(Connection.class,
             "disconnectListener");
     public static final MethodHandle CONNECTION_PACKET_LISTENER = NMS.getSetter(Connection.class, "packetListener");
+    private static final MethodHandle FOLIA_GET_CURRENT_WORLD_DATA = NMS.getMethodHandle(Level.class,
+            "getCurrentWorldData", false);
+    private static final MethodHandle FOLIA_REMOVE_CONNECTION = FOLIA_GET_CURRENT_WORLD_DATA == null ? null
+            : NMS.getMethodHandle(FOLIA_GET_CURRENT_WORLD_DATA.type().returnType(), "removeConnection", false,
+                    ServerPlayer.class);
     private static final MethodHandle CRAFT_BOSSBAR_HANDLE_FIELD = NMS.getFirstSetter(CraftBossBar.class,
             ServerBossEvent.class);
     private static final EntityDataAccessor<Pose> DATA_POSE = NMS.getStaticObject(Entity.class, "DATA_POSE");
