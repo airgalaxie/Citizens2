@@ -90,7 +90,7 @@ dist/target/Citizens-2.0.44-bGradle-build-Gradle-build.jar
 Build details:
 
 ```text
-The branch includes a Gradle 9.7.1 wrapper and uses the com.gradleup.shadow
+The branch includes a Gradle 9.8.1 wrapper and uses the com.gradleup.shadow
 9.6.1 plugin.
 
 Paper API 26.3 is selected by default through the version catalog.
