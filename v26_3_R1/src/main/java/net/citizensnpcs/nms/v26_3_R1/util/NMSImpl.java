@@ -1,6 +1,7 @@
 package net.citizensnpcs.nms.v26_3_R1.util;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +69,6 @@ import com.mojang.authlib.services.MinecraftServicesSessionService;
 import com.mojang.authlib.services.response.MinecraftProfilePropertiesResponse;
 import com.mojang.util.UndashedUuid;
 
-import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import net.citizensnpcs.Settings.Setting;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.NavigatorParameters;
@@ -368,6 +368,7 @@ import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -2276,9 +2277,11 @@ public class NMSImpl implements NMSBridge {
 
     @SuppressWarnings("rawtypes")
     public static void clearFluidTracker(NPC npc, Entity handle) {
+        if (ENTITY_FLUID_INTERACTION_MAP == null)
+            return;
         Map map;
         try {
-            map = (Reference2ObjectMap) ENTITY_FLUID_INTERACTION_MAP.invoke(ENTITY_FLUID_INTERACTION.invoke(handle));
+            map = (Map) ENTITY_FLUID_INTERACTION_MAP.invoke(ENTITY_FLUID_INTERACTION.invoke(handle));
         } catch (Throwable e) {
             e.printStackTrace();
             return;
@@ -2290,26 +2293,24 @@ public class NMSImpl implements NMSBridge {
     public static void clearGoals(NPC npc, Mob entity) {
         GoalSelector[] goalSelectors;
         try {
-            goalSelectors = new GoalSelector[] { (GoalSelector) GOAL_SELECTOR.invoke(entity),
-                    (GoalSelector) TARGET_SELECTOR.invoke(entity) };
+            goalSelectors = new GoalSelector[] { entity.getGoalSelector(), entity.targetSelector };
         } catch (Throwable e) {
             e.printStackTrace();
             return;
         }
-        int i = 0;
-        for (GoalSelector selector : goalSelectors) {
+        for (int i = 0; i < goalSelectors.length; i++) {
+            GoalSelector selector = goalSelectors[i];
             try {
-                Collection<?> list = selector.getAvailableGoals();
+                Collection<WrappedGoal> list = selector.getAvailableGoals();
                 if (list.isEmpty())
                     continue;
                 npc.data().set("selector" + i, Lists.newArrayList(list));
-                list.clear();
+                selector.removeAllGoals(g -> true);
             } catch (Exception e) {
                 Messaging.logTr(Messages.ERROR_CLEARING_GOALS, e.getLocalizedMessage());
             } catch (Throwable e) {
                 Messaging.logTr(Messages.ERROR_CLEARING_GOALS, e.getLocalizedMessage());
             }
-            i++;
         }
     }
 
@@ -2734,27 +2735,6 @@ public class NMSImpl implements NMSBridge {
         }
     }
 
-    public static void resetPuffTicks(Pufferfish fish) {
-        try {
-            PUFFERFISH_INFLATE.invoke(fish, 0);
-            PUFFERFISH_DEFLATE.invoke(fish, 0);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void restoreFluidTracker(NPC npc) {
-        Entity handle = getHandle(npc.getEntity());
-        Map map;
-        try {
-            map = (Map) ENTITY_FLUID_INTERACTION_MAP.invoke(ENTITY_FLUID_INTERACTION.invoke(handle));
-        } catch (Throwable e) {
-            e.printStackTrace();
-            return;
-        }
-        map.putAll(npc.data().get("efi"));
-    }
-
     public static void removeRegionConnection(ServerPlayer player) {
         if (FOLIA_REMOVE_CONNECTION == null)
             return;
@@ -2768,21 +2748,44 @@ public class NMSImpl implements NMSBridge {
         }
     }
 
-    public static void restoreGoals(NPC npc, Mob entity) {
-        GoalSelector[] goalSelectors;
+    public static void resetPuffTicks(Pufferfish fish) {
         try {
-            goalSelectors = new GoalSelector[] { (GoalSelector) GOAL_SELECTOR.invoke(entity),
-                    (GoalSelector) TARGET_SELECTOR.invoke(entity) };
+            PUFFERFISH_INFLATE.invoke(fish, 0);
+            PUFFERFISH_DEFLATE.invoke(fish, 0);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void restoreFluidTracker(NPC npc) {
+        if (ENTITY_FLUID_INTERACTION_MAP == null)
+            return;
+        Entity handle = getHandle(npc.getEntity());
+        Map map;
+        try {
+            map = (Map) ENTITY_FLUID_INTERACTION_MAP.invoke(ENTITY_FLUID_INTERACTION.invoke(handle));
         } catch (Throwable e) {
             e.printStackTrace();
             return;
         }
-        int i = 0;
-        for (GoalSelector selector : goalSelectors) {
+        map.putAll(npc.data().get("efi"));
+    }
+
+    public static void restoreGoals(NPC npc, Mob entity) {
+        GoalSelector[] goalSelectors;
+        try {
+            goalSelectors = new GoalSelector[] { entity.getGoalSelector(), entity.targetSelector };
+        } catch (Throwable e) {
+            e.printStackTrace();
+            return;
+        }
+        for (int i = 0; i < goalSelectors.length; i++) {
+            GoalSelector selector = goalSelectors[i];
             try {
                 Collection<?> list = selector.getAvailableGoals();
                 list.clear();
                 Collection old = npc.data().get("selector" + i);
+                npc.data().remove("selector" + i);
                 if (old != null) {
                     list.addAll(old);
                 }
@@ -2791,7 +2794,6 @@ public class NMSImpl implements NMSBridge {
             } catch (Throwable e) {
                 Messaging.logTr(Messages.ERROR_RESTORING_GOALS, e.getLocalizedMessage());
             }
-            i++;
         }
     }
 
@@ -2950,14 +2952,16 @@ public class NMSImpl implements NMSBridge {
         if (npc == null)
             return;
         if (npc.useMinecraftAI()) {
-            restoreGoals(npc, entity);
-            if (npc.data().has("brain")) {
-                try {
-                    BRAIN_SETTER.invoke(entity, npc.data().get("brain"));
-                } catch (Throwable e) {
-                    e.printStackTrace();
+            if (npc.data().has("brain") || npc.data().has("selector0")) {
+                restoreGoals(npc, entity);
+                if (npc.data().has("brain")) {
+                    try {
+                        BRAIN_SETTER.invoke(entity, npc.data().get("brain"));
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                    npc.data().remove("brain");
                 }
-                npc.data().remove("brain");
             }
         } else {
             clearGoals(npc, entity);
@@ -3016,11 +3020,6 @@ public class NMSImpl implements NMSBridge {
     public static final MethodHandle CONNECTION_DISCONNECT_LISTENER = NMS.getSetter(Connection.class,
             "disconnectListener");
     public static final MethodHandle CONNECTION_PACKET_LISTENER = NMS.getSetter(Connection.class, "packetListener");
-    private static final MethodHandle FOLIA_GET_CURRENT_WORLD_DATA = NMS.getMethodHandle(Level.class,
-            "getCurrentWorldData", false);
-    private static final MethodHandle FOLIA_REMOVE_CONNECTION = FOLIA_GET_CURRENT_WORLD_DATA == null ? null
-            : NMS.getMethodHandle(FOLIA_GET_CURRENT_WORLD_DATA.type().returnType(), "removeConnection", false,
-                    ServerPlayer.class);
     private static final MethodHandle CRAFT_BOSSBAR_HANDLE_FIELD = NMS.getFirstSetter(CraftBossBar.class,
             ServerBossEvent.class);
     private static final EntityDataAccessor<Pose> DATA_POSE = NMS.getStaticObject(Entity.class, "DATA_POSE");
@@ -3038,8 +3037,7 @@ public class NMSImpl implements NMSBridge {
             int.class);
     private static final MethodHandle ENTITY_FLUID_INTERACTION = NMS.getFirstGetter(Entity.class,
             EntityFluidInteraction.class);
-    private static final MethodHandle ENTITY_FLUID_INTERACTION_MAP = NMS.getFirstGetter(EntityFluidInteraction.class,
-            Reference2ObjectMap.class);
+    private static MethodHandle ENTITY_FLUID_INTERACTION_MAP;
     private static final MethodHandle ENTITY_NAVIGATION = NMS.getFirstSetter(Mob.class, PathNavigation.class);
     private static CustomEntityRegistry ENTITY_REGISTRY;
     private static MethodHandle ENTITY_REGISTRY_SETTER;
@@ -3052,11 +3050,15 @@ public class NMSImpl implements NMSBridge {
             boolean.class);
     private static final MethodHandle FLYING_MOVECONTROL_FLOAT_SETTER = NMS.getFirstSetter(FlyingMoveControl.class,
             boolean.class);
+    private static final MethodHandle FOLIA_GET_CURRENT_WORLD_DATA = NMS.getMethodHandle(Level.class,
+            "getCurrentWorldData", false);
+    private static final MethodHandle FOLIA_REMOVE_CONNECTION = FOLIA_GET_CURRENT_WORLD_DATA == null ? null
+            : NMS.getMethodHandle(FOLIA_GET_CURRENT_WORLD_DATA.type().returnType(), "removeConnection", false,
+                    ServerPlayer.class);
     public static final MethodHandle FOX_SET_FACEPLANTED = NMS.getMethodHandle(Fox.class, "setFaceplanted", true,
             boolean.class);
     private static final Location FROM_LOCATION = new Location(null, 0, 0, 0);
     private static final MethodHandle GET_BLOCK_STATE;
-    private static final MethodHandle GOAL_SELECTOR = NMS.getGetter(Mob.class, "goalSelector");
     private static final EntityDataAccessor<Float> INTERACTION_HEIGHT = NMS.getStaticObject(Interaction.class,
             "DATA_HEIGHT_ID");
     private static final EntityDataAccessor<Float> INTERACTION_WIDTH = NMS.getStaticObject(Interaction.class,
@@ -3102,7 +3104,6 @@ public class NMSImpl implements NMSBridge {
     private static final MethodHandle SIZE_FIELD_GETTER = NMS.getFirstGetter(Entity.class, EntityDimensions.class);
     private static final MethodHandle SIZE_FIELD_SETTER = NMS.getFirstSetter(Entity.class, EntityDimensions.class);
     private static MethodHandle SKULL_META_PROFILE;
-    private static final MethodHandle TARGET_SELECTOR = NMS.getGetter(Mob.class, "goalSelector");
     private static MethodHandle TEAM_FIELD;
     private static final Collection<MethodHandle> TRACKED_ENTITY_SETTERS = NMS.getSettersOfType(Entity.class,
             TrackedEntity.class);
@@ -3122,6 +3123,15 @@ public class NMSImpl implements NMSBridge {
         } catch (Throwable e) {
             e.printStackTrace();
             Messaging.logTr(Messages.ERROR_GETTING_ID_MAPPING, e.getMessage());
+        }
+        try {
+            for (Field field : EntityFluidInteraction.class.getDeclaredFields()) {
+                if (Map.class.isAssignableFrom(field.getType())) {
+                    ENTITY_FLUID_INTERACTION_MAP = NMS.getGetter(EntityFluidInteraction.class, field.getName());
+                }
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
     }
 }
